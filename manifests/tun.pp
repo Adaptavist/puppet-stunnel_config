@@ -2,19 +2,19 @@
 
 define stunnel_config::tun(
     $certificate,
+    $user,
+    $group,
+    $client,
+    $accept,
+    $connect,
     $private_key    = false,
     $ca_file        = undef,
     $crl_file       = undef,
     $ssl_version    = 'TLSv1',
     $chroot         = undef,
-    $user,
-    $group,
     $pid_file       = "/${name}.pid",
     $debug_level    = '0',
     $log_dest       = "/var/log/${name}.log",
-    $client,
-    $accept,
-    $connect,
     $conf_dir       = $stunnel::params::conf_dir,
     $verify         = 1,
     $retry          = false,
@@ -32,7 +32,7 @@ define stunnel_config::tun(
     $real_fips = undef
   }
 
-  if ($private_key != "false" and $private_key != false){
+  if ($private_key != 'false' and $private_key != false){
     $real_private_key = $private_key
   } else {
     $real_private_key = false

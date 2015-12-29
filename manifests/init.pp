@@ -4,13 +4,13 @@ class stunnel_config (
     $create_files     =    {},
     $merge_tunnels    =    true,
     $merge_files      =    true,
-    $fips_supported   =    "false",
+    $fips_supported   =    'false',
 ) {
 
     #tunnels and files can be set at either global or host level, therefore check to see if the hosts hash exists
-    if ($host != undef) {
+    if ($::host != undef) {
 
-        validate_hash($host)
+        validate_hash($::host)
 
         #if a host level "merge_tunnels" flag has been set use it, otherwise use the global flag
         $merge_host_tunnels = $host['stunnel_config::merge_tunnels'] ? {
@@ -64,14 +64,14 @@ class stunnel_config (
 
     # RedHat based systems do not have an sysvinit script for stunnel
     # Create one based on the Ubuntu sysvinit sctipt
-    if ($osfamily == "RedHat" ) {
+    if ($::osfamily == 'RedHat' ) {
         # create init script
         file { "/etc/init.d/${stunnel_service}":
-            content  => template("${name}/stunnel-sysvinit.erb"),
-            owner    => 'root',
-            group    => 'root',
-            mode     => 0755,
-            require  => Class['stunnel'],
+            content => template("${name}/stunnel-sysvinit.erb"),
+            owner   => 'root',
+            group   => 'root',
+            mode    => '0755',
+            require => Class['stunnel'],
         }
         service { $stunnel_service:
             ensure     => running,
@@ -102,7 +102,7 @@ class stunnel_config (
     Stunnel_config::Tun<| |> -> Exec['restart stunnel']
     exec { 'restart stunnel':
         command => "service ${stunnel_service} restart",
-        path    => "/usr/bin:/usr/sbin:/bin:/sbin",
+        path    => '/usr/bin:/usr/sbin:/bin:/sbin',
         require => Service[$stunnel_service],
     }
 }
