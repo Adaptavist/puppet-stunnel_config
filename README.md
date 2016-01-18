@@ -1,4 +1,5 @@
 # Puppet module to wrap around puppetlabs/stunnel module, simplifying it's use
+[![Build Status](https://travis-ci.org/Adaptavist/puppet-stunnel_config.svg?branch=master)](https://travis-ci.org/Adaptavist/puppet-stunnel_config)
 
 * Requires puppetlabs/stunnel
 
