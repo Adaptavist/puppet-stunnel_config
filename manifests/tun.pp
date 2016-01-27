@@ -22,6 +22,7 @@ define stunnel_config::tun(
     $ssl_options    = undef,
     $socket_options = [],
     $fips           = false,
+    $stunnel_binary = '/usr/bin/stunnel',
 ) {
 
   # if FIPS is supported pass through the value provided, if not pass through undef (forces template to skip fips directive)
@@ -39,6 +40,28 @@ define stunnel_config::tun(
   }
 
   $real_client = str2bool($client)
+
+  $service_provider = $stunnel_config::service_provider
+  # if the service provider is systemd 
+  if ($service_provider == 'systemd') {
+    $stunnel_service = "stunnel-${name}"
+    # create systemd unit file
+    file { "/etc/systemd/system/${stunnel_service}.service":
+        content => template('stunnel_config/stunnel-systemd-service.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => Class['stunnel'],
+    }
+    service { $stunnel_service:
+        ensure     => running,
+        provider   => $service_provider,
+        enable     => true,
+        hasrestart => true,
+        hasstatus  => false,
+        require    => [File["/etc/systemd/system/${stunnel_service}.service"],File["${conf_dir}/${name}.conf"]]
+    }
+  }
 
   stunnel::tun { $name:
     certificate    => $certificate,

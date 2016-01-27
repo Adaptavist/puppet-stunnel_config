@@ -54,7 +54,7 @@ describe 'stunnel_config', :type => 'class' do
     }
   }
 
-  context "Should contain stunnel service on RedHat type systems and have only global files/tunnels present" do
+  context "Should contain stunnel sysvinit service on RedHat type systems and have only global files/tunnels present" do
 
     let(:params) {
       { :create_files => global_file,
@@ -71,6 +71,8 @@ describe 'stunnel_config', :type => 'class' do
       should contain_file('/etc/stunnel/stunnel.pem').with(
           'content'     => 'this is the global level file'
       )
+      should_not contain_file('/etc/systemd/system/stunnel.target')
+      should_not contain_service('stunnel-rsync')      
       should_not contain_file('/etc/stunnel/client.pem')
       should contain_service('stunnel')
       should_not contain_service('stunnel4')
@@ -92,7 +94,49 @@ describe 'stunnel_config', :type => 'class' do
     end
   end
 
-  context "Should contain stunnel4 service on Debian type systems and have only global files/tunnels present" do
+    context "Should contain stunnel systemd service and target on RedHat >= 7 type systems and have only global files/tunnels present" do
+
+    let(:params) {
+      { :create_files => global_file,
+        :tuns => global_tunnel
+      }
+    }
+
+    let(:facts) {
+     { :osfamily     => 'RedHat',
+       :operatingsystem => 'CentOS',
+       :operatingsystemrelease => '7' }
+    }
+
+    it do
+      should contain_class('stunnel')
+      should contain_file('/etc/stunnel/stunnel.pem').with(
+          'content'     => 'this is the global level file'
+      )
+      should_not contain_file('/etc/stunnel/client.pem')
+      should contain_file('/etc/systemd/system/stunnel.target')
+      should contain_service('stunnel-rsync')
+      should_not contain_service('stunnel')
+      should_not contain_service('stunnel4')
+      should contain_stunnel__tun('rsync').with(
+          'accept'      => '8873',
+          'connect'     => '873',
+          'certificate' => '/etc/stunnel/stunnel.pem',
+          'chroot'      => '/var/lib/stunnel4/',
+          'user'        => 'stunnel4',
+          'group'       => 'stunnel4',
+          'pid_file'    => '/stunnel4-rsync.pid',
+          'ssl_options' => 'NO_SSLv2',
+          'client'      => false,
+          'foreground'  => false,
+          'debug_level' => '0',
+          'verify'      => '1'
+    )
+    should_not contain_stunnel__tun('mysql')
+    end
+  end
+
+  context "Should contain stunnel4 sysvinit service on Debian type systems and have only global files/tunnels present" do
 
     let(:params) {
       { :create_files => global_file,
@@ -109,6 +153,8 @@ describe 'stunnel_config', :type => 'class' do
       should contain_file('/etc/stunnel/stunnel.pem').with(
           'content'     => 'this is the global level file'
       )
+      should_not contain_file('/etc/systemd/system/stunnel.target')
+      should_not contain_service('stunnel-rsync') 
       should_not contain_file('/etc/stunnel/client.pem')
       should_not contain_service('stunnel')
       should contain_service('stunnel4')
