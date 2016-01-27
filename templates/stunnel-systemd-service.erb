@@ -1,0 +1,15 @@
+[Unit]
+Description=<%= @name %> SSL tunnel
+After=network.target syslog.target stunnel.target
+PartOf=stunnel.target
+
+[Install]
+WantedBy=stunnel.target
+
+[Service]
+Type=forking
+ExecStart=<%= @stunnel_binary %> <%= @conf_dir %>/<%= @name %>.conf
+Restart=always
+PrivateTmp=false
+# Give up if ping don't get an answer
+TimeoutSec=600

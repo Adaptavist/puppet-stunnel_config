@@ -9,6 +9,13 @@
 # description: Secure Tunnel
 # processname: stunnel
 
+### BEGIN INIT INFO
+# Provides: <%= @stunnel_service %>
+# ShortDescription: start and stop stunnel services
+# Required-Start: $local_fs $network
+# Required-Stop: $local_fs $network
+### END INIT INFO
+
 SERVICE_NAME="<%= @stunnel_service %>"
 DEFAULTPIDFILE="/var/run/${SERVICE_NAME}.pid"
 DAEMON=/usr/bin/stunnel

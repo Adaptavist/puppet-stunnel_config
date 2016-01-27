@@ -1,11 +1,14 @@
 # Wrapper class for configuring stunnel
 class stunnel_config (
-    $tuns             =    {},
-    $create_files     =    {},
-    $merge_tunnels    =    true,
-    $merge_files      =    true,
-    $fips_supported   =    'false',
-) {
+    $tuns             = $stunnel_config::params::tuns,
+    $create_files     = $stunnel_config::params::create_files,
+    $merge_tunnels    = $stunnel_config::params::merge_tunnels,
+    $merge_files      = $stunnel_config::params::merge_files,
+    $fips_supported   = $stunnel_config::params::fips_supported,
+    $service_provider = $stunnel_config::params::service_provider,
+) inherits stunnel_config::params {
+
+    validate_re($service_provider, ['^init$', '^systemd$'])
 
     #tunnels and files can be set at either global or host level, therefore check to see if the hosts hash exists
     if ($::host != undef) {
@@ -62,32 +65,52 @@ class stunnel_config (
     include stunnel
     $stunnel_service  = $stunnel::params::service
 
-    # RedHat based systems do not have an sysvinit script for stunnel
-    # Create one based on the Ubuntu sysvinit sctipt
-    if ($::osfamily == 'RedHat' ) {
-        # create init script
-        file { "/etc/init.d/${stunnel_service}":
-            content => template("${name}/stunnel-sysvinit.erb"),
+    if ($service_provider == 'init') {
+        $stunnel_service_require = [Service[$stunnel_service]]
+        $service_restart_command = "service ${stunnel_service} restart"
+        # RedHat based systems do not have an sysvinit script for stunnel
+        # Create one based on the Ubuntu sysvinit script
+        if ($::osfamily == 'RedHat' ) {
+            # create init script
+            file { "/etc/init.d/${stunnel_service}":
+                content => template("${name}/stunnel-sysvinit.erb"),
+                owner   => 'root',
+                group   => 'root',
+                mode    => '0755',
+                require => Class['stunnel'],
+            }
+            service { $stunnel_service:
+                ensure     => running,
+                provider   => $service_provider,
+                enable     => true,
+                hasrestart => true,
+                hasstatus  => false,
+                require    => File["/etc/init.d/${stunnel_service}"],
+            }
+        }
+    }
+    else {
+        # crate a systemd stunnel target, each stunnel tunnel will have its own systemd service that is partof/wantedby this target unit
+        $stunnel_service_require = [File['/etc/systemd/system/stunnel.target'],Exec['register stunnel target']]
+        $service_restart_command= 'systemctl restart stunnel.target'
+        file { '/etc/systemd/system/stunnel.target':
+            content => template("${name}/stunnel-systemd-target.erb"),
             owner   => 'root',
             group   => 'root',
-            mode    => '0755',
+            mode    => '0644',
             require => Class['stunnel'],
-        }
-        service { $stunnel_service:
-            ensure     => running,
-            enable     => true,
-            hasrestart => true,
-            hasstatus  => false,
-            require    => File["/etc/init.d/${stunnel_service}"],
+        } ->
+        exec { 'register stunnel target':
+            command => 'systemctl enable stunnel.target',
+            path    => '/usr/bin:/usr/sbin:/bin:/sbin',
         }
     }
 
     if ($files_to_create) {
         validate_hash($files_to_create)
-
         $create_files_defaults = {
             require => Package[$stunnel::params::package],
-            before => Service[$stunnel_service],
+            before => $stunnel_service_require,
         }
         create_resources(file, $files_to_create, $create_files_defaults)
     }
@@ -96,13 +119,13 @@ class stunnel_config (
 
     $create_tuns_defaults = {
         'notify' => Exec['restart stunnel'],
-        require => Service[$stunnel_service],
+        require => $stunnel_service_require,
     }
     create_resources(stunnel_config::tun, $tunnel_configs, $create_tuns_defaults)
     Stunnel_config::Tun<| |> -> Exec['restart stunnel']
     exec { 'restart stunnel':
-        command => "service ${stunnel_service} restart",
+        command => $service_restart_command,
         path    => '/usr/bin:/usr/sbin:/bin:/sbin',
-        require => Service[$stunnel_service],
+        require => $stunnel_service_require,
     }
 }
