@@ -22,6 +22,7 @@ define stunnel_config::tun(
     $ssl_options    = undef,
     $socket_options = [],
     $fips           = false,
+    $ciphers        = undef,
     $stunnel_binary = '/usr/bin/stunnel',
 ) {
 
@@ -37,6 +38,12 @@ define stunnel_config::tun(
     $real_private_key = $private_key
   } else {
     $real_private_key = false
+  }
+
+  if ($ciphers != 'false' and $ciphers != false){
+    $real_ciphers = $ciphers
+  } else {
+    $real_ciphers = undef
   }
 
   $real_client = str2bool($client)
@@ -82,7 +89,8 @@ define stunnel_config::tun(
     verify         => $verify,
     ssl_options    => $ssl_options,
     socket_options => $socket_options,
-    fips           => $real_fips
+    fips           => $real_fips,
+    ciphers        => $real_ciphers
   }
 
 
