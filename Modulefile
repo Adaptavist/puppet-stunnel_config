@@ -1,5 +1,5 @@
 name 'adaptavist/stunnel_config'
-version '0.2.12'
+version '0.2.13'
 source 'git@github.com:Adaptavist/puppet-stunnel_config.git'
 author 'adaptavist'
 summary 'stunnel_config Module' 
