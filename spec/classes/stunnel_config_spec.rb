@@ -62,9 +62,11 @@ describe 'stunnel_config', :type => 'class' do
       }
     }
 
-    let(:facts) {
-     { :osfamily     => 'RedHat' }
-    }
+    let(:facts) {{
+      :osfamily => 'RedHat',
+      :operatingsystemrelease => '6',
+      :operatingsystem => 'CentOS'
+    }}
 
     it do
       should contain_class('stunnel')
@@ -102,11 +104,11 @@ describe 'stunnel_config', :type => 'class' do
       }
     }
 
-    let(:facts) {
-     { :osfamily     => 'RedHat',
-       :operatingsystem => 'CentOS',
-       :operatingsystemrelease => '7' }
-    }
+    let(:facts) {{
+      :osfamily     => 'RedHat',
+      :operatingsystem => 'CentOS',
+      :operatingsystemrelease => '7' 
+    }}
 
     it do
       should contain_class('stunnel')
@@ -144,9 +146,11 @@ describe 'stunnel_config', :type => 'class' do
       }
     }
 
-    let(:facts) {
-     { :osfamily     => 'Debian' }
-    }
+    let(:facts) {{
+      :osfamily     => 'Debian',
+      :operatingsystemrelease => '14',
+      :operatingsystem => 'Debian'
+    }}
 
     it do
       should contain_class('stunnel')
@@ -184,10 +188,12 @@ describe 'stunnel_config', :type => 'class' do
       }
     }
 
-    let(:facts) {
-      { :host => host_tunnel.merge(host_file)
-      }
-    }
+    let(:facts) {{
+      :host => host_tunnel.merge(host_file),
+      :osfamily => 'RedHat',
+      :operatingsystemrelease => '7',
+      :operatingsystem => 'CentOS'
+    }}
 
     it do
       should contain_class('stunnel')
@@ -236,10 +242,12 @@ describe 'stunnel_config', :type => 'class' do
       }
     }
 
-    let(:facts) {
-      { :host => host_tunnel.merge(host_file).merge(host_file_merge_off).merge(host_tunnel_merge_off)
-      }
-    }
+    let(:facts) {{
+      :host => host_tunnel.merge(host_file).merge(host_file_merge_off).merge(host_tunnel_merge_off),
+      :osfamily => 'RedHat',
+      :operatingsystemrelease => '7',
+      :operatingsystem => 'CentOS'
+    }}
 
     it do
       should contain_class('stunnel')
@@ -273,10 +281,12 @@ describe 'stunnel_config', :type => 'class' do
       }
     }
 
-    let(:facts) {
-      { :host => host_tunnel.merge(host_file).merge(host_file_merge_off).merge(host_tunnel_merge_on)
-      }
-    }
+    let(:facts) {{
+      :host => host_tunnel.merge(host_file).merge(host_file_merge_off).merge(host_tunnel_merge_on),
+      :osfamily => 'RedHat',
+      :operatingsystemrelease => '7',
+      :operatingsystem => 'CentOS'
+    }}
 
     it do
       should contain_class('stunnel')
@@ -323,10 +333,12 @@ describe 'stunnel_config', :type => 'class' do
       }
     }
 
-    let(:facts) {
-      { :host => host_tunnel.merge(host_file).merge(host_file_merge_on).merge(host_tunnel_merge_off)
-      }
-    }
+    let(:facts) {{
+      :host => host_tunnel.merge(host_file).merge(host_file_merge_on).merge(host_tunnel_merge_off),
+      :osfamily => 'RedHat',
+      :operatingsystemrelease => '7',
+      :operatingsystem => 'CentOS'
+    }}
 
     it do
       should contain_class('stunnel')

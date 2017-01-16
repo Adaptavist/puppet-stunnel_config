@@ -1,8 +1,8 @@
 fixtures:
   repositories:
     stunnel:
-      repo: "https://github.com/Adaptavist/puppetlabs-stunnel"
+      repo: "https://github.com/Adaptavist/puppet-stunnel"
     stdlib:
-      repo: "https://github.com/Adaptavist/puppetlabs-stdlib"
+      repo: "https://github.com/Adaptavist/puppet-stdlib"
   symlinks:
     stunnel_config: "#{source_dir}"

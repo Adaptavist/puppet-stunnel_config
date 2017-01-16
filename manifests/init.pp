@@ -88,8 +88,7 @@ class stunnel_config (
                 require    => File["/etc/init.d/${stunnel_service}"],
             }
         }
-    }
-    else {
+    } else {
         # crate a systemd stunnel target, each stunnel tunnel will have its own systemd service that is partof/wantedby this target unit
         $stunnel_service_require = [File['/etc/systemd/system/stunnel.target'],Exec['register stunnel target']]
         $service_restart_command= 'systemctl restart stunnel.target'
