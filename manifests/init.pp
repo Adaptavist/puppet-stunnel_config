@@ -8,7 +8,7 @@ class stunnel_config (
     $service_provider = $stunnel_config::params::service_provider,
 ) inherits stunnel_config::params {
 
-    validate_re($service_provider, ['^init$', '^systemd$'])
+    validate_re($service_provider, ['^init$', '^systemd$', '^redhat'])
 
     #tunnels and files can be set at either global or host level, therefore check to see if the hosts hash exists
     if ($::host != undef) {
@@ -65,7 +65,7 @@ class stunnel_config (
     include stunnel
     $stunnel_service  = $stunnel::params::service
 
-    if ($service_provider == 'init') {
+    if ($service_provider == 'init' or $service_provider == 'redhat') {
         $stunnel_service_require = [Service[$stunnel_service]]
         $service_restart_command = "service ${stunnel_service} restart"
         # RedHat based systems do not have an sysvinit script for stunnel
@@ -98,8 +98,7 @@ class stunnel_config (
             group   => 'root',
             mode    => '0644',
             require => Class['stunnel'],
-        } ->
-        exec { 'register stunnel target':
+        } -> exec { 'register stunnel target':
             command => 'systemctl enable stunnel.target',
             path    => '/usr/bin:/usr/sbin:/bin:/sbin',
         }
