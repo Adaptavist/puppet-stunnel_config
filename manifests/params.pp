@@ -9,6 +9,10 @@ class stunnel_config::params {
     if ($::osfamily == 'RedHat') and (versioncmp($::operatingsystemrelease,'7') >= 0 and $::operatingsystem != 'Fedora') {
         $service_provider = 'systemd'
     }
+    # if an older version of redhat use the 'redhat' provider, as 'init' is broken on puppet v4
+    elsif ($::osfamily == 'RedHat') {
+        $service_provider = 'redhat'
+    }
     else {
         $service_provider = 'init'
     }
